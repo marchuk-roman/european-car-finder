@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>European Car Finder - Пошук авто в Європі</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .filters-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .filters-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-button {
+            grid-column: 1 / -1;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-button:active {
+            transform: translateY(0);
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .results-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .platforms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .platform-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .platform-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .platform-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .platform-country {
+            font-size: 0.9em;
+            color: #999;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .platform-link {
+            display: inline-block;
+            padding: 10px 16px;
+            background: #f5f5f5;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .platform-link:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .info-message {
+            background: #e8f4f8;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 0.95em;
+            color: #444;
+        }
+
+        .platform-features {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .platforms-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .no-results {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+            font-size: 1.1em;
+        }
+
+        .filter-tag {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin: 4px;
+            color: #666;
+        }
+
+        .active-filters {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-button:hover {
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .result-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            margin-top: 15px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .result-value {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .info-alert {
+            background: #d1ecf1;
+            border-left: 4px solid #0c5460;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .info-alert strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚗 European Car Finder</h1>
+            <p>Пошук вживаних автомобілів по всій Європі</p>
+        </header>
+
+        <div class="filters-section">
+            <div class="tabs">
+                <button class="tab-button active" onclick="switchTab(event, 'search')">🔍 Пошук платформ</button>
+                <button class="tab-button" onclick="switchTab(event, 'vin')">🔎 VIN Декодер</button>
+                <button class="tab-button" onclick="switchTab(event, 'customs')">💰 Калькулятор мита</button>
+                <button class="tab-button" onclick="switchTab(event, 'prices')">📊 Цены</button>
+                <button class="tab-button" onclick="switchTab(event, 'ratings')">⭐ Рейтинг</button>
+                <button class="tab-button" onclick="switchTab(event, 'info')">ℹ️ Інформація</button>
+            </div>
+
+            <!-- TAB 1: ПОШУК ПЛАТФОРМ -->
+            <div id="search" class="tab-content active">
+                <div class="filters-title">🔍 Параметри пошуку</div>
+                
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="country">Країна</label>
+                        <select id="country">
+                            <option value="">Всі країни</option>
+                            <option value="germany">🇩🇪 Німеччина</option>
+                            <option value="poland">🇵🇱 Польща</option>
+                            <option value="netherlands">🇳🇱 Нідерланди</option>
+                            <option value="belgium">🇧🇪 Бельгія</option>
+                            <option value="france">🇫🇷 Франція</option>
+                            <option value="spain">🇪🇸 Іспанія</option>
+                            <option value="italy">🇮🇹 Італія</option>
+                            <option value="czech">🇨🇿 Чехія</option>
+                            <option value="austria">🇦🇹 Австрія</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="fuel">Тип палива</label>
+                        <select id="fuel">
+                            <option value="">Всі типи</option>
+                            <option value="benzin">Бензин</option>
+                            <option value="diesel">Дизель</option>
+                            <option value="hybrid">Гібрид</option>
+                            <option value="electric">Електро</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="carType">Тип автомобіля</label>
+                        <select id="carType">
+                            <option value="">Всі типи</option>
+                            <option value="sedan">Седан</option>
+                            <option value="suv">SUV</option>
+                            <option value="wagon">Універсал</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="yearFrom">Рік від</label>
+                        <input type="number" id="yearFrom" placeholder="2015" min="1990" max="2025">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="yearTo">Рік до</label>
+                        <input type="number" id="yearTo" placeholder="2024" min="1990" max="2025">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="priceFrom">Вартість від (€)</label>
+                        <input type="number" id="priceFrom" placeholder="1000" min="0">
+                    </div>
+
+                    <button class="search-button" onclick="searchCars()">🔍 Знайти</button>
+                </div>
+            </div>
+
+            <!-- TAB 2: VIN ДЕКОДЕР -->
+            <div id="vin" class="tab-content">
+                <h2>🔎 VIN Декодер</h2>
+                <p style="color: #666; margin: 15px 0;">Введіть VIN (17 символів)</p>
+                <input type="text" id="vinInput" placeholder="WVWZZZ3CZ3E123456" maxlength="17" style="width: 100%; margin-bottom: 10px;">
+                <button class="search-button" onclick="decodeVIN()" style="width: 100%;">Декодувати</button>
+                <div id="vinResults"></div>
+            </div>
+
+            <!-- TAB 3: КАЛЬКУЛЯТОР -->
+            <div id="customs" class="tab-content">
+                <h2>💰 Калькулятор мита</h2>
+                <div class="filters-grid" style="margin-top: 15px;">
+                    <div class="filter-group">
+                        <label>Ціна (€)</label>
+                        <input type="number" id="carPrice" placeholder="5000">
+                    </div>
+                    <div class="filter-group">
+                        <label>Об'єм (см³)</label>
+                        <input type="number" id="engineVolume" placeholder="1600">
+                    </div>
+                    <div class="filter-group">
+                        <label>Рік</label>
+                        <input type="number" id="carYear" placeholder="2015" min="1990" max="2025">
+                    </div>
+                </div>
+                <button class="search-button" onclick="calculateCustoms()" style="margin-top: 10px;">Розрахувати</button>
+                <div id="customsResults"></div>
+            </div>
+
+            <!-- TAB 4: ЦЕНЫ -->
+            <div id="prices" class="tab-content">
+                <h2>📊 Порівняння цін</h2>
+                <div id="priceComparisonResults" style="margin-top: 15px;"></div>
+            </div>
+
+            <!-- TAB 5: РЕЙТИНГ -->
+            <div id="ratings" class="tab-content">
+                <h2>⭐ Рейтинг платформ</h2>
+                <div id="platformRatingsResults" style="margin-top: 15px;"></div>
+            </div>
+
+            <!-- TAB 6: ІНФОРМАЦІЯ -->
+            <div id="info" class="tab-content">
+                <h2>ℹ️ Важлива інформація</h2>
+                <div class="info-alert" style="margin-top: 15px;">
+                    <strong>📢 Новини 2026:</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li>Електромобілі: -50% мита</li>
+                        <li>Гібриди дорожають на 15-20% в ЄС</li>
+                        <li>Спад попиту на дизелі</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section" style="margin-top: 30px;">
+            <div id="activeFilters" class="active-filters" style="display:none;">
+                <strong>Активні фільтри:</strong>
+                <div id="filterTags"></div>
+            </div>
+            <div id="resultsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        const platforms = [
+            { name: "Mobile.de", country: "germany", flag: "🇩🇪", description: "Найбільша Німеччини", url: "https://www.mobile.de/?lang=en", features: "500k+ оголошень" },
+            { name: "AutoScout24.de", country: "germany", flag: "🇩🇪", description: "Європейська платформа", url: "https://www.autoscout24.de", features: "Мультикрайнова" },
+            { name: "Otomoto.pl", country: "poland", flag: "🇵🇱", description: "Найбільша Польщі", url: "https://www.otomoto.pl/", features: "300k+ оголошень" },
+            { name: "AutoScout24.pl", country: "poland", flag: "🇵🇱", description: "Європейська", url: "https://www.autoscout24.pl", features: "Добрі фільтри" },
+            { name: "AutoScout24.nl", country: "netherlands", flag: "🇳🇱", description: "Європейська", url: "https://www.autoscout24.nl", features: "Якісні авто" },
+            { name: "AutoScout24.be", country: "belgium", flag: "🇧🇪", description: "Бельгія", url: "https://www.autoscout24.be", features: "Якісні авто" },
+            { name: "LaCentrale.fr", country: "france", flag: "🇫🇷", description: "Франція", url: "https://www.lacentrale.fr", features: "Надійні продавці" },
+            { name: "Coches.net", country: "spain", flag: "🇪🇸", description: "Іспанія", url: "https://www.coches.net", features: "400k+ оголошень" },
+            { name: "AutoScout24.it", country: "italy", flag: "🇮🇹", description: "Італія", url: "https://www.autoscout24.it", features: "Велика база" },
+            { name: "Sauto.cz", country: "czech", flag: "🇨🇿", description: "Чехія", url: "https://www.sauto.cz", features: "Добрі ціни" },
+            { name: "AutoScout24", country: "", flag: "🌍", description: "40+ країн", url: "https://www.autoscout24.com", features: "Мультикрайнова" },
+            { name: "eCarsTrade", country: "", flag: "🌍", description: "Аукціони авто", url: "https://ecarstrade.com", features: "18000+ машин" }
+        ];
+
+        function switchTab(event, tabName) {
+            event.preventDefault();
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'prices') loadPriceComparison();
+            if (tabName === 'ratings') loadPlatformRatings();
+        }
+
+        function searchCars() {
+            const country = document.getElementById('country').value;
+            let filtered = platforms.filter(p => !country || !p.country || p.country === country);
+
+            let filters = [];
+            if (country) filters.push(`Країна: ${document.getElementById('country').options[document.getElementById('country').selectedIndex].text}`);
+            if (document.getElementById('fuel').value) filters.push(`Паливо: ${document.getElementById('fuel').options[document.getElementById('fuel').selectedIndex].text}`);
+
+            document.getElementById('filterTags').innerHTML = filters.map(f => `<span class="filter-tag">${f}</span>`).join('');
+            document.getElementById('activeFilters').style.display = filters.length > 0 ? 'block' : 'none';
+
+            displayResults(filtered);
+        }
+
+        function displayResults(filtered) {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = '';
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="no-results">❌ Не знайдено</div>';
+                return;
+            }
+
+            container.innerHTML = `<div class="info-message">✅ Знайдено ${filtered.length} платформ</div>`;
+            const grid = document.createElement('div');
+            grid.className = 'platforms-grid';
+
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'platform-card';
+                card.innerHTML = `<div class="platform-name">${p.flag} ${p.name}</div><div class="platform-country">${p.description}</div><div class="platform-features">📍 ${p.features}</div><a href="${p.url}" target="_blank" class="platform-link">Перейти →</a>`;
+                grid.appendChild(card);
+            });
+
+            container.appendChild(grid);
+        }
+
+        function decodeVIN() {
+            const vin = document.getElementById('vinInput').value.toUpperCase();
+            if (vin.length !== 17) { alert('VIN має 17 символів'); return; }
+            const result = document.getElementById('vinResults');
+            result.innerHTML = `<div class="result-box"><div class="result-item"><span class="result-label">VIN:</span><span>${vin}</span></div><div class="result-item"><span class="result-label">Рік:</span><span>${getYearFromVIN(vin[9])}</span></div></div>`;
+        }
+
+        function getYearFromVIN(char) {
+            const years = {'A': 2010, 'B': 2011, 'C': 2012, 'D': 2013, 'E': 2014, 'F': 2015, 'G': 2016, 'H': 2017, 'J': 2018, 'K': 2019, 'L': 2020, 'M': 2021, 'N': 2022, 'P': 2023, 'R': 2024, 'T': 2025};
+            return years[char] || 'Невідомо';
+        }
+
+        function calculateCustoms() {
+            const price = parseFloat(document.getElementById('carPrice').value);
+            const engine = parseFloat(document.getElementById('engineVolume').value);
+            const year = parseInt(document.getElementById('carYear').value);
+
+            if (!price || !engine || !year) { alert('Заповніть все'); return; }
+
+            const duty = price * 0.10;
+            const carAge = 2026 - year;
+            let exciseRate = engine <= 1000 ? 25 : engine <= 1500 ? 35 : engine <= 2000 ? 55 : 75;
+            const excise = (engine / 1000) * exciseRate * (carAge <= 5 ? 1 : 0.9) * 100;
+            const totalBeforeTax = price + duty + (excise / 27);
+            const vat = totalBeforeTax * 0.20;
+            const total = totalBeforeTax + vat;
+
+            document.getElementById('customsResults').innerHTML = `
+                <div class="result-box">
+                    <div class="result-item"><span class="result-label">Вартість:</span><span class="result-value">€${price}</span></div>
+                    <div class="result-item"><span class="result-label">Мито:</span><span>€${duty.toFixed(0)}</span></div>
+                    <div class="result-item"><span class="result-label">Акциз:</span><span>€${(excise/27).toFixed(0)}</span></div>
+                    <div class="result-item"><span class="result-label">ПДВ:</span><span>€${vat.toFixed(0)}</span></div>
+                    <div class="result-item" style="border-top: 2px solid #667eea;"><span class="result-label">Всього:</span><span class="result-value">€${total.toFixed(0)}</span></div>
+                </div>
+            `;
+        }
+
+        function loadPriceComparison() {
+            const data = [
+                { model: 'VW Golf', germany: 8000, poland: 7200, czech: 7000 },
+                { model: 'Skoda Octavia', germany: 9000, poland: 8200, czech: 7800 },
+                { model: 'BMW 320i', germany: 12000, poland: 10500, czech: 10000 }
+            ];
+
+            document.getElementById('priceComparisonResults').innerHTML = data.map(car => `
+                <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea; margin-bottom: 10px;">
+                    <div style="font-weight: 600; color: #667eea;">${car.model}</div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 0.9em; margin-top: 10px;">
+                        <div>🇩🇪 ${car.germany}€</div>
+                        <div>🇵🇱 ${car.poland}€</div>
+                        <div>🇨🇿 ${car.czech}€</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadPlatformRatings() {
+            const ratings = [
+                { name: 'Mobile.de', rating: '★★★★★', listings: '500k+' },
+                { name: 'AutoScout24', rating: '★★★★★', listings: '1.5M+' },
+                { name: 'Otomoto.pl', rating: '★★★★☆', listings: '300k+' },
+                { name: 'Coches.net', rating: '★★★★☆', listings: '400k+' }
+            ];
+
+            document.getElementById('platformRatingsResults').innerHTML = ratings.map(p => `
+                <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #e0e0e0; margin-bottom: 10px; display: flex; justify-content: space-between;">
+                    <div><div style="font-weight: 600; color: #667eea;">${p.name}</div><div style="font-size: 0.85em; color: #999;">Оголошень: ${p.listings}</div></div>
+                    <div style="color: #ffc107; font-size: 1.2em;">${p.rating}</div>
+                </div>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            displayResults(platforms);
+        });
+    </script>
+</body>
+</html>
